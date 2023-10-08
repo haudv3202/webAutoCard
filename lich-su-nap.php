@@ -8,9 +8,15 @@ if (!isset($_SESSION['username'])) { // nếu tài khoản chưa đăng nhập, 
     exit();
 }
 
-$username = $_SESSION['username']; // lấy tên đăng nhập của tài khoản đã đăng nhập từ session
+$username = $_SESSION['username'];
 
-$result = $conn->query("SELECT * FROM `trans_log` WHERE name='$username' AND status != 0"); // Lấy thông tin các giao dịch đã hoàn thành (status = 1, 2 hoặc 3) của tài khoản đã đăng nhập
+// Sử dụng prepared statements
+$stmt = $conn->prepare("SELECT * FROM `trans_log` WHERE name=? AND status != 0");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+
+// Xử lý kết quả
+$result = $stmt->get_result();// Lấy thông tin các giao dịch đã hoàn thành (status = 1, 2 hoặc 3) của tài khoản đã đăng nhập
 if ($result->num_rows > 0) {
     echo "<table>";
     echo "<tr><th>Tài khoản</th><th>Loại thẻ</th><th>Số serial</th><th>Mã pin</th><th>Mệnh giá</th><th>Trạng thái</th><th>Thời gian</th></tr>";

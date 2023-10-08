@@ -53,12 +53,16 @@ if ($_POST) {
     else if ($conn->query($sql)->num_rows > 0)
         $error = '<div class="error">Tên tài khoản đã tồn tại!.</div>';
     else {
-        
-        $sql = "INSERT INTO `user` (`username`,`password`,`lock`) VALUES ('". $uname ."','". $passw ."',0)";
-        if ($conn->query($sql)) 
-                $error = 'Đăng ký thành công!!!!';
-        else
+
+        $stmt = $conn->prepare("INSERT INTO `user` (`username`,`password`,`lock`) VALUES (?, ?, 0)");
+        $stmt->bind_param("ss", $uname, $passw);
+
+// Thực hiện truy vấn SQL
+        if ($stmt->execute()) {
+            $error = 'Đăng ký thành công!!!!';
+        } else {
             $error = 'Đăng ký không thành công!.';
+        }
     }
 } 
 

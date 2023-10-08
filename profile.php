@@ -34,17 +34,27 @@ $_tcoin = isset($_tcoin) ? $_tcoin : 0;
 
 
 <?php
-                                                  $sql = "SELECT player.name, player.gender,player.clan_id_sv1,JSON_EXTRACT(player.data_task, '$[0]') AS data_task, JSON_EXTRACT(player.data_point, '$[1]') AS suc_manh, account.admin, account.tichdiem FROM player INNER JOIN account ON account.id = player.account_id WHERE account.username='$_username'";
-                            $result = mysqli_query($conn, $sql);
-                            $row = mysqli_fetch_assoc($result);
+$username = $_username;
+
+// Sử dụng prepared statements
+$stmt = $conn->prepare("SELECT player.name, player.gender, player.clan_id_sv1, JSON_EXTRACT(player.data_task, '$[0]') AS data_task, JSON_EXTRACT(player.data_point, '$[1]') AS suc_manh, account.admin, account.tichdiem FROM player INNER JOIN account ON account.id = player.account_id WHERE account.username=?");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
                   
  if (isset($row['data_task'])) {
                                 $data_task = $row['data_task'];
                                 $clan = $row['clan_id_sv1'];
                                 $sucmanh = $row['suc_manh'];
-                                $sql2 = "SELECT clan_sv1.name FROM clan_sv1 INNER JOIN account ON clan_sv1.id = $clan WHERE account.username='$_username'";
-                            $result2 = mysqli_query($conn, $sql2);
-                            $row2 = mysqli_fetch_assoc($result2);
+     $username = $_username;
+
+// Sử dụng prepared statements
+     $stmt2 = $conn->prepare("SELECT clan_sv1.name FROM clan_sv1 INNER JOIN account ON clan_sv1.id = ? WHERE account.username=?");
+     $stmt2->bind_param("ss", $clan, $username);
+     $stmt2->execute();
+     $result2 = $stmt2->get_result();
+     $row2 = $result2->fetch_assoc();
                             if ($clan < 0) {
     $bang = "không có bang hội";
     } elseif ($clan == 0) {

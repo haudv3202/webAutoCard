@@ -29,7 +29,7 @@ if ($_login === null) {
         } else {
             $select = _fetch("SELECT * FROM account WHERE username=?", [$username]);
 
-            if ($select != null && $select['password'] == $password) {
+            if ($select != null && password_verify($password, $select['password'])) {
                 // Kiểm tra xem tài khoản có nhân vật hay chưa dựa trên ID tài khoản
                 $account_id = $select['id'];
                 $result = _fetch("SELECT * FROM player WHERE account_id=?", [$account_id]);

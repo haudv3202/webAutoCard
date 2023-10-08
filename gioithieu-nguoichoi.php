@@ -176,13 +176,26 @@ if ($_login === null) {
                                         // Thực hiện trừ điểm tích luỹ tương ứng với mốc đó
                                         $_gioithieu -= $diem_moc;
 
-                                        // Cập nhật cơ sở dữ liệu với giá trị mới của cột "vnd" và "gioithieu"
-                                        $sql = "UPDATE account SET balance = $_coin, gioithieu = $_gioithieu WHERE id = $_SESSION[id]";
-                                        if (mysqli_query($conn, $sql)) {
+                                        $coin = $_coin;
+                                        $gioithieu =  $_gioithieu;
+                                        $userId = $_SESSION[id];
+
+// Sử dụng prepared statements với placeholders
+                                        $sql = "UPDATE account SET balance = ?, gioithieu = ? WHERE id = ?";
+                                        $stmt = $conn->prepare($sql);
+
+// Bind giá trị với các placeholders
+                                        $stmt->bind_param("sss", $coin, $gioithieu, $userId);
+
+// Thực hiện truy vấn SQL sử dụng mysqli_query()
+                                        if ($stmt->execute()) {
                                             echo "Đổi quà thành công!";
                                         } else {
-                                            echo "Lỗi cập nhật cơ sở dữ liệu: " . mysqli_error($conn);
+                                            echo "Lỗi cập nhật cơ sở dữ liệu: " . $stmt->error;
                                         }
+
+// Đóng statement sau khi sử dụng
+                                        $stmt->close();
                                     }
                                 }
                             }

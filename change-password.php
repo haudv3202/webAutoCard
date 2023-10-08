@@ -8,7 +8,7 @@ if(isset($_POST['password']))
 	$old_pass = htmlspecialchars(trim($_POST['password']));
 	$new_pass = htmlspecialchars(trim($_POST['new_password']));
 	$re_pass = htmlspecialchars(trim($_POST['new_password_confirmation']));
-	if($old_pass != $_password)
+	if(!password_verify($old_pass ,$_password))
 	{
 		echo '
 		<script type="text/javascript">
