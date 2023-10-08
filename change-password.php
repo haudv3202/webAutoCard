@@ -5,9 +5,9 @@ $_alert = null;
 if($_login == null) {header("location:/");}
 if(isset($_POST['password']))
   {  
-	$old_pass = isset_sql($_POST['password']);
-	$new_pass = isset_sql($_POST['new_password']);
-	$re_pass = isset_sql($_POST['new_password_confirmation']);
+	$old_pass = htmlspecialchars(trim($_POST['password']));
+	$new_pass = htmlspecialchars(trim($_POST['new_password']));
+	$re_pass = htmlspecialchars(trim($_POST['new_password_confirmation']));
 	if($old_pass != $_password)
 	{
 		echo '
@@ -48,7 +48,7 @@ if(isset($_POST['password']))
 		}
 		else
 		{
-			$query = _query(_update('account',"password='$new_pass'","username='$_username'"));
+			$query = _query("UPDATE account SET password=? WHERE username=?", [$new_pass, $_username]);
 			if($query)
 			{
 				echo '

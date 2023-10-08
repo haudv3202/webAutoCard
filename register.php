@@ -5,84 +5,79 @@ include_once 'head.php';
 $_alert = null;
 if ($_login == null) 
 {
-	if(isset($_POST['username']))
-	{
-		  
-
-      			$username = isset_sql($_POST['username']);
-			$password = isset_sql($_POST['password']);
-			$repassword = isset_sql($_POST['repassword']);
-			
-			if($password == $repassword) {
-				$txt = _insert('account',"username,password","'$username','$password'");
-				$read = _select("*",'account',"username='$username'");
-				if(is_array(_fetch($read)))
-				{
-					echo '
-					<script type="text/javascript">
-					
-					$(document).ready(function(){
-					
-					  swal({
-							title: "Thất bại",
-							text: "Tài khoản này đã tồn tại, vui lòng chọn tài khoản khác!",
-							type: "error",
-							confirmButtonText: "OK",
-					  })
-					});
-					
-					</script>
-					';
-				}else
-				{
-					$kiemtra = _query($txt);
-					if($kiemtra)
-					{
-						echo '
-						<script type="text/javascript">
-						
-						$(document).ready(function(){
-						
-						  swal({
-								title: "Thành công",
-								text: "Đăng kí thành công!!",
-								type: "success",
-								confirmButtonText: "OK",
-						  })
-						});
-						
-						</script>
-						';
-					}	
-				}
-			}
-			else
-			{
-				echo '
-				<script type="text/javascript">
-				
-				$(document).ready(function(){
-				
-				  swal({
-						title: "Thất bại",
-						text: "Hai mật khẩu không khớp nhau, vui lòng kiểm tra lại!",
-						type: "error",
-						confirmButtonText: "OK",
-				  })
-				});
-				
-				</script>
-				';
-			}
-			
-		
-	}
+    if(isset($_POST['username']))
+    {
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+        $repassword = $_POST['repassword'];
+        
+        if($password == $repassword) {
+            $password = password_hash($password, PASSWORD_BCRYPT); // Hash the password
+            $user = _fetch("SELECT * FROM account WHERE username = ?", [$username]);
+            if($user)
+            {
+                echo '
+                <script type="text/javascript">
+                
+                $(document).ready(function(){
+                
+                  swal({
+                        title: "Thất bại",
+                        text: "Tài khoản này đã tồn tại, vui lòng chọn tài khoản khác!",
+                        type: "error",
+                        confirmButtonText: "OK",
+                  })
+                });
+                
+                </script>
+                ';
+            }else
+            {
+                _insert('account', ['username' => $username, 'password' => $password]);
+                echo '
+                <script type="text/javascript">
+                
+                $(document).ready(function(){
+                
+                  swal({
+                        title: "Thành công",
+                        text: "Đăng kí thành công!!",
+                        type: "success",
+                        confirmButtonText: "OK",
+                  })
+                });
+                
+                </script>
+                ';
+            }
+        }
+        else
+        {
+            echo '
+            <script type="text/javascript">
+            
+            $(document).ready(function(){
+            
+              swal({
+                    title: "Thất bại",
+                    text: "Hai mật khẩu không khớp nhau, vui lòng kiểm tra lại!",
+                    type: "error",
+                    confirmButtonText: "OK",
+              })
+            });
+            
+            </script>
+            ';
+        }
+    }
 } 
 else 
 {
-	header('location:/user.php');
+    header('location:/user.php');
 }
 ?>
+<!-- ... (phần HTML của bạn) -->
+
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><link rel="stylesheet" type="text/css" href="cid:css-6eafeb38-8cab-408e-bc0a-651aa2ca60f2@mhtml.blink" /><link rel="stylesheet" type="text/css" href="cid:css-370d601e-6f57-4b01-891c-462b6f59c504@mhtml.blink" />
         
 

@@ -27,12 +27,12 @@ if ($_login === null) {
 					</script>
 					';
         } else {
-            $select = _fetch(_select("*", 'account', "username='$username'"));
+            $select = _fetch("SELECT * FROM account WHERE username=?", [$username]);
 
             if ($select != null && $select['password'] == $password) {
                 // Kiểm tra xem tài khoản có nhân vật hay chưa dựa trên ID tài khoản
                 $account_id = $select['id'];
-                $result = _fetch(_select("*", 'player', "`account_id`='$account_id'"));
+                $result = _fetch("SELECT * FROM player WHERE account_id=?", [$account_id]);
 
                 if ($result != null) {
                     $_SESSION['account'] = $username;
@@ -81,6 +81,9 @@ if ($_login === null) {
     header("location:/");
 }
 ?>
+
+<!-- Your HTML content here -->
+
 
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><link rel="stylesheet" type="text/css" href="cid:css-f9157133-ca3f-4414-89e3-e012be8b7e90@mhtml.blink" /><link rel="stylesheet" type="text/css" href="cid:css-e0646869-274c-43a6-8928-7898a9c9a8aa@mhtml.blink" />
         

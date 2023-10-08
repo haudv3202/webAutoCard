@@ -100,76 +100,84 @@ $_alert = '';
  -->
 <div class="py-3">
     <div class="table-responsive">
-        <?php
-        include_once 'set.php';
+    <?php
+include_once 'set.php';
 
-        // Lấy dữ liệu từ form sử dụng phương thức POST
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            // Lấy giá trị của tiêu đề và nội dung bài viết
-            $tieude = htmlspecialchars($_POST["tieude"]);
-            $noidung = htmlspecialchars($_POST["noidung"]);
+// Lấy dữ liệu từ form sử dụng phương thức POST
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Lấy giá trị của tiêu đề và nội dung bài viết
+    $tieude = htmlspecialchars($_POST["tieude"]);
+    $noidung = htmlspecialchars($_POST["noidung"]);
 
-            if (isset($_POST['username'])) {
-                $_username = $_POST['username'];
-            }
-            $sql = "SELECT player.name FROM player INNER JOIN account ON account.id = player.account_id WHERE account.username='$_username'";
-            $result = mysqli_query($conn, $sql);
-            $row = mysqli_fetch_assoc($result);
-            $_name = $row['name'];
+    if (isset($_POST['username'])) {
+        $_username = $_POST['username'];
+    }
+    $stmt = $conn->prepare("SELECT player.name FROM player INNER JOIN account ON account.id = player.account_id WHERE account.username=?");
+    $stmt->bind_param("s", $_username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $_name = $row['name'];
 
-            // Kiểm tra nếu có tệp tin ảnh được tải lên
-            if (isset($_FILES['image']) && !empty($_FILES['image']['name'][0])) {
-                $image_files = $_FILES['image'];
-                $total_files = count($image_files['name']);
+    // Kiểm tra nếu có tệp tin ảnh được tải lên
+    if (isset($_FILES['image']) && !empty($_FILES['image']['name'][0])) {
+        $image_files = $_FILES['image'];
+        $total_files = count($image_files['name']);
 
-                $image_names = array(); // Mảng để lưu trữ tên tệp tin ảnh
-                $upload_directory = "uploads/"; // Thư mục lưu trữ ảnh
-        
-                for ($i = 0; $i < $total_files; $i++) {
-                    $image_filename = $image_files['name'][$i];
-                    $image_tmp = $image_files['tmp_name'][$i];
+        $image_names = array(); // Mảng để lưu trữ tên tệp tin ảnh
+        $upload_directory = "uploads/"; // Thư mục lưu trữ ảnh
 
-                    $targetFile = $upload_directory . basename($image_filename);
+        for ($i = 0; $i < $total_files; $i++) {
+            $image_filename = $image_files['name'][$i];
+            $image_tmp = $image_files['tmp_name'][$i];
 
-                    // Di chuyển tệp tin ảnh vào thư mục lưu trữ
-                    move_uploaded_file($image_tmp, $targetFile);
+            $targetFile = $upload_directory . basename($image_filename);
 
-                    // Thêm tên tệp tin vào mảng
-                    $image_names[] = basename($image_filename);
-                }
+            // Di chuyển tệp tin ảnh vào thư mục lưu trữ
+            move_uploaded_file($image_tmp, $targetFile);
 
-                // Chuyển đổi mảng thành chuỗi JSON
-                $image_names_json = json_encode($image_names);
-
-                // Lưu dữ liệu (bao gồm username và danh sách tên tệp tin ảnh) vào cơ sở dữ liệu bằng câu lệnh INSERT INTO
-                $sql = "INSERT INTO posts (tieude, noidung, image, username) VALUES ('$tieude', '$noidung','$image_names_json', '$_name')";
-            } else {
-                // Nếu không có tệp tin ảnh được tải lên, lưu dữ liệu (bao gồm username) vào cơ sở dữ liệu bằng câu lệnh INSERT INTO
-                $sql = "INSERT INTO posts (tieude, noidung, username) VALUES ('$tieude', '$noidung', '$_name')";
-            }
-
-            if (mysqli_query($conn, $sql)) {
-                // Lấy số điểm tích lũy hiện tại của người dùng
-                $sql_select = "SELECT a.tichdiem FROM account a INNER JOIN player p ON a.id = p.account_id WHERE p.name = '$_name'";
-                $result_select = mysqli_query($conn, $sql_select);
-                $row_select = mysqli_fetch_assoc($result_select);
-                $tichdiem = $row_select['tichdiem'];
-
-                // Cập nhật giá trị tichdiem trong bảng account
-                $sql_update = "UPDATE account SET tichdiem = ($tichdiem + 1) WHERE id = (SELECT account_id FROM player WHERE name = '$_name')";
-                mysqli_query($conn, $sql_update);
-
-                echo "Bài viết đã được đăng thành công.";
-                // header("Location: baiviet.php");
-                // exit;
-            } else {
-                echo "Lỗi: " . $sql . "<br>" . mysqli_error($conn);
-            }
+            // Thêm tên tệp tin vào mảng
+            $image_names[] = basename($image_filename);
         }
 
-        // Đóng kết nối với cơ sở dữ liệu
-        mysqli_close($conn);
-        ?>
+        // Chuyển đổi mảng thành chuỗi JSON
+        $image_names_json = json_encode($image_names);
+
+        // Lưu dữ liệu (bao gồm username và danh sách tên tệp tin ảnh) vào cơ sở dữ liệu bằng câu lệnh INSERT INTO
+        $stmt = $conn->prepare("INSERT INTO posts (tieude, noidung, image, username) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $tieude, $noidung, $image_names_json, $_name);
+    } else {
+        // Nếu không có tệp tin ảnh được tải lên, lưu dữ liệu (bao gồm username) vào cơ sở dữ liệu bằng câu lệnh INSERT INTO
+        $stmt = $conn->prepare("INSERT INTO posts (tieude, noidung, username) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $tieude, $noidung, $_name);
+    }
+
+    if ($stmt->execute()) {
+        // Lấy số điểm tích lũy hiện tại của người dùng
+        $stmt_select = $conn->prepare("SELECT a.tichdiem FROM account a INNER JOIN player p ON a.id = p.account_id WHERE p.name = ?");
+        $stmt_select->bind_param("s", $_name);
+        $stmt_select->execute();
+        $result_select = $stmt_select->get_result();
+        $row_select = $result_select->fetch_assoc();
+        $tichdiem = $row_select['tichdiem'];
+
+        // Cập nhật giá trị tichdiem trong bảng account
+        $stmt_update = $conn->prepare("UPDATE account SET tichdiem = ? WHERE id = (SELECT account_id FROM player WHERE name = ?)");
+        $new_tichdiem = $tichdiem + 1;
+        $stmt_update->bind_param("is", $new_tichdiem, $_name);
+        $stmt_update->execute();
+
+        echo "Bài viết đã được đăng thành công.";
+        // header("Location: baiviet.php");
+        // exit;
+    } else {
+        echo "Lỗi: " . $stmt->error;
+    }
+}
+
+// Đóng kết nối với cơ sở dữ liệu
+$conn->close();
+?>
     </div>
     <div class="border-secondary border-top"></div>
     <div class="container pt-4 pb-4 text-white">

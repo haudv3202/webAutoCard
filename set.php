@@ -14,7 +14,7 @@ $_character = isset($_SESSION['player']) ? $_SESSION['player'] : null;
 if($_character != null)
 {
 	$_login = "on";
-	$character_arr = _fetch("SELECT * FROM player WHERE username='$_character'");
+	$character_arr = _fetch("SELECT * FROM player WHERE username=?", [$_character]);
 	if(count($character_arr) <= 0){header("location:/?out");} 
 	$_tcoin = htmlspecialchars($_character['vnd']);
 }
@@ -26,7 +26,7 @@ $_user = isset($_SESSION['account']) ? $_SESSION['account'] : null;
 if($_user != null)
 {
 	$_login = "on";
-	$user_arr = _fetch("SELECT * FROM account Where username='$_user'");
+	$user_arr = _fetch("SELECT * FROM account WHERE username=?", [$_user]);
 	if(count($user_arr) <= 0){header("location:/?out");}
 	$_username = htmlspecialchars($user_arr['username']);
 	$_password = htmlspecialchars($user_arr['password']); 

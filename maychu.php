@@ -2,7 +2,7 @@
 $link_server = 'ngocrongtagon.online';
 $name_server = 'Ngọc rồng tagon';
 $logo = 'logo.jpg';
-$apk = 'https://drive.google.com/file/d/1ldJ7wORUIqEK5E_fzGDUBCSgWcgdhXH1/view?usp=drivesdk';
+$apk = 'https://drive.google.com/file/d/1mWZj5t6oYgLqGzUe8hInYYks_jZ9C6S7/view?usp=drive_link';
 $pc = '2';
 $ios = '3';
 $java = '4';

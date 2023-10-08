@@ -62,9 +62,9 @@ if ($_login === null) {
                 // Activate or unlock account
                 elseif (($_status == '0' || $_status == '-1') && $_coin >= 20000) {
                     $coin = $_coin;
-                    $stmt = $mysqli->prepare('UPDATE account SET active = 1, vnd = ? WHERE username = ?');
-                    $stmt->bind_param('is', $coin, $_username);
-                    if ($stmt->execute() && $stmt->affected_rows > 0) {
+                    $stmt = $config->prepare('UPDATE account SET active = 1, vnd = ? WHERE username = ?');
+                    $stmt->execute([$coin, $_username]);
+                    if ($stmt->rowCount() > 0) {
                         $_alert = '<div class="text-danger pb-2 font-weight-bold">Kích hoạt tài khoản thành công. Bây giờ bạn đã có thể đăng nhập vào game!</div>';
                         if ($_status == '-1') {
                             $_alert = '<div class="text-danger pb-2 font-weight-bold">Mở khóa tài khoản thành công. Bây giờ bạn đã có thể đăng nhập vào game!</div>';
