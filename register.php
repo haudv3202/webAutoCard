@@ -12,7 +12,6 @@ if ($_login == null)
         $repassword = $_POST['repassword'];
         
         if($password == $repassword) {
-            $password = password_hash($password, PASSWORD_BCRYPT); // Hash the password
             $user = _fetch("SELECT * FROM account WHERE username = ?", [$username]);
             if($user)
             {

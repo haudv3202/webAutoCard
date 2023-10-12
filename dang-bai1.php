@@ -33,7 +33,7 @@ $_alert = '';
 
 <!-- bootstrap -->
 
-    </head>
+</head>
 <div class="p-1 mt-1 alert alert-danger" style="border-radius: 7px; box-shadow: 0px 0px 5px black;">
 <body> 
                 <?php if($_login === null) { ?>

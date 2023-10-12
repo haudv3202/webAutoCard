@@ -1,8 +1,24 @@
 <?php
 include_once 'set.php';
 include_once 'head.php';
-
 $_title = "Ngọc Rồng Light - Đăng Nhập";
+
+$login_attempt_limit = 5;
+
+// Get client IP
+if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+    $ip = $_SERVER['HTTP_CLIENT_IP'];
+} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+} else {
+    $ip = $_SERVER['REMOTE_ADDR'];
+}
+
+// Initialize or increment login attempts for this IP
+if (!isset($_SESSION['login_attempts'][$ip])) {
+    $_SESSION['login_attempts'][$ip] = 0;
+}
+
 if ($_login === null) {
     if (isset($_POST['username'])) {
 
@@ -26,15 +42,16 @@ if ($_login === null) {
 					
 					</script>
 					';
+                     $_SESSION['login_attempts'][$ip]++;
         } else {
             $select = _fetch("SELECT * FROM account WHERE username=?", [$username]);
 
-            if ($select != null && password_verify($password, $select['password'])) {
+            if ($select != null && $password == $select['password']) {
                 // Kiểm tra xem tài khoản có nhân vật hay chưa dựa trên ID tài khoản
                 $account_id = $select['id'];
                 $result = _fetch("SELECT * FROM player WHERE account_id=?", [$account_id]);
-
                 if ($result != null) {
+                     $_SESSION['login_attempts'][$ip] = 0;
                     $_SESSION['account'] = $username;
                     $_SESSION['id'] = $select['id'];
                     header('location:index.php');
@@ -71,6 +88,7 @@ if ($_login === null) {
 					
 					</script>
 					';
+                     $_SESSION['login_attempts'][$ip]++;
             }
         }
 
@@ -79,6 +97,24 @@ if ($_login === null) {
     }
 } else {
     header("location:/");
+}
+
+if ($_SESSION['login_attempts'][$ip] >= $login_attempt_limit) {
+     echo '
+                    <script type="text/javascript">
+                    
+                    $(document).ready(function(){
+                    
+                      swal({
+                            title: "Thất bại",
+                            text: "Bạn đã thử đăng nhập quá nhiều lần. Vui lòng thử lại sau một thời gian.",
+                            type: "error",
+                            confirmButtonText: "OK",
+                      })
+                    });
+                    
+                    </script>
+                    ';
 }
 ?>
 
